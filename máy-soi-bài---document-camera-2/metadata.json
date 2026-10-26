@@ -1,0 +1,11 @@
+{
+  "name": " Máy Soi Bài - Document Camera 2",
+  "description": "Ứng dụng máy soi bài học tập và trình chiếu tài liệu từ điện thoại lên máy tính qua WebRTC \u0026 Firebase.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

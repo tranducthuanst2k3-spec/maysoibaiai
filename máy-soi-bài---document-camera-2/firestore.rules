@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidRoom(data) {
+      return data.keys().hasAll(['mode', 'ownerUid']) &&
+        data.mode in ['idle', 'video'] &&
+        data.ownerUid is string &&
+        data.ownerUid.size() <= 128 &&
+        data.ownerUid == request.auth.uid &&
+        (!('offer' in data) || data.offer is map || data.offer == null) &&
+        (!('answer' in data) || data.answer is map || data.answer == null) &&
+        (!('action' in data) || data.action in ['capture', 'stream']) &&
+        (!('timestamp' in data) || data.timestamp is number) &&
+        (!('rotation' in data) || data.rotation in [0, 90, 180, 270]);
+    }
+
+    function isValidCandidate(data) {
+      return data.keys().hasAll(['candidate']) &&
+        data.candidate is string &&
+        data.candidate.size() <= 2048;
+    }
+
+    // Room collection: document ID is roomId
+    match /rooms/{roomId} {
+      allow get, list: if isValidId(roomId);
+      allow create, update: if isValidId(roomId);
+      allow delete: if isValidId(roomId);
+
+      // Caller candidates subcollection
+      match /callerCandidates/{candidateId} {
+        allow read, write: if isValidId(roomId);
+      }
+
+      // Callee candidates subcollection
+      match /calleeCandidates/{candidateId} {
+        allow read, write: if isValidId(roomId);
+      }
+    }
+  }
+}

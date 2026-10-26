@@ -1,0 +1,88 @@
+{
+  "entities": {
+    "Room": {
+      "title": "Room",
+      "description": "WebRTC signaling room and document camera state for a user",
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["idle", "video"],
+          "description": "Current display mode of the document camera"
+        },
+        "offer": {
+          "type": "object",
+          "description": "WebRTC Offer session description from caller"
+        },
+        "answer": {
+          "type": "object",
+          "description": "WebRTC Answer session description from callee"
+        },
+        "ownerUid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the room owner",
+          "maxLength": 128
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last update"
+        },
+        "action": {
+          "type": "string",
+          "enum": ["capture", "stream"],
+          "description": "Signaling action to freeze frame for grading or resume continuous streaming"
+        },
+        "rotation": {
+          "type": "number",
+          "enum": [0, 90, 180, 270],
+          "description": "Camera rotation angle controlled from mobile or PC"
+        },
+        "timestamp": {
+          "type": "number",
+          "description": "Unix timestamp in milliseconds when action was triggered"
+        }
+      },
+      "required": ["mode", "ownerUid"]
+    },
+    "IceCandidate": {
+      "title": "IceCandidate",
+      "description": "WebRTC ICE candidate representation for peer-to-peer connection",
+      "type": "object",
+      "properties": {
+        "candidate": {
+          "type": "string",
+          "description": "Candidate SDP string",
+          "maxLength": 2048
+        },
+        "sdpMid": {
+          "type": "string",
+          "description": "Media stream identification tag",
+          "maxLength": 128
+        },
+        "sdpMLineIndex": {
+          "type": "number",
+          "description": "Index of the media description in SDP"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of creation"
+        }
+      },
+      "required": ["candidate"]
+    }
+  },
+  "firestore": {
+    "/rooms/{roomId}": {
+      "schema": "Room",
+      "description": "Room document keyed by user UID for camera/projector synchronization"
+    },
+    "/rooms/{roomId}/callerCandidates/{candidateId}": {
+      "schema": "IceCandidate",
+      "description": "ICE candidates sent by the caller (mobile camera)"
+    },
+    "/rooms/{roomId}/calleeCandidates/{candidateId}": {
+      "schema": "IceCandidate",
+      "description": "ICE candidates sent by the callee (PC receiver)"
+    }
+  }
+}
